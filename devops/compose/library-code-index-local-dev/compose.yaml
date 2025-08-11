@@ -1,0 +1,57 @@
+x-variables:
+  main-image: &main-image localhost/local-dev/library-code-index-base:local-dev
+services:
+  app:
+    image: *main-image
+    env_file:
+      - .env
+    environment:
+      PGUSER: 'postgres'
+      PGHOST: 'db'
+      PGDATABASE: 'postgres'
+      PGPASSWORD: 'localhost'
+      PGPORT: 5432
+    ports:
+      - ${APP_HOST_PORT:-3000}:${APP_CONTAINER_PORT:-3000}
+    volumes:
+      - ../../../services:/services
+      - /services/node_modules
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: localhost
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ../../../services/pg/schema:/docker-entrypoint-initdb.d
+
+  postgrest:
+    image: postgrest/postgrest
+    ports:
+      - ${POSTGREST_HOST_PORT:-3001}:${POSTGREST_CONTAINER_PORT:-3000}
+    environment:
+      PGRST_DB_URI: postgres://postgres:localhost@db:5432/postgres
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://127.0.0.1:${POSTGREST_HOST_PORT:-3001}
+      PGRST_DB_SCHEMAS: api
+      PGRST_DB_ANON_ROLE: postgres
+      PGRST_SERVER_CORS_ALLOWED_ORIGINS: "http://localhost:${APP_HOST_PORT:-3000}"
+    depends_on:
+      - db
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports:
+      - ${SWAGGER_HOST_PORT:-3002}:${SWAGGER_CONTAINER_PORT:-8080}
+    expose:
+      - "8080"
+    environment:
+      API_URL: http://localhost:3001/
+    depends_on:
+      - postgrest
+
+  adminer:
+    image: adminer:5
+    ports:
+      - ${ADMINER_HOST_PORT:-8080}:8080
+
+volumes:
+  db-data:

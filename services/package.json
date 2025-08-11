@@ -1,0 +1,20 @@
+{
+  "name": "library-code-index-base-image",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "spelkey@ucdavis.edu",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "lci": "cli/bin/lci.js"
+  },
+  "dependencies": {
+    "@ucd-lib/logger": "^0.0.7",
+    "commander": "^14.0.0",
+    "node-fetch": "^3.3.2"
+  }
+}
