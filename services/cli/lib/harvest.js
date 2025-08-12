@@ -30,6 +30,8 @@ class Harvest {
         console.log('No more organizations in the queue.');
         break;
       }
+      const ct = await harvester.models.org.getQueueCount({reviewed: 'is.false'});
+      console.log(`Queue Count: ${ct} organizations left to review`);
       try {
         const orgDetails = await github.fetch(result.item.url);
         const simplified = {

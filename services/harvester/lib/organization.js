@@ -43,22 +43,52 @@ class Organization {
     return data[0];
   }
 
+  async getQueueCount(query={}) {
+    const params = new URLSearchParams({
+      item_type: 'eq.Organization',
+      ...query
+    });
+
+    const response = await fetch(`${config.postgrest.host.value}/selection_queue?${params.toString()}`, {
+      method: 'HEAD',
+      headers: {
+        'Prefer': 'count=exact'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch organization count from queue: ${response.statusText}`);
+    }
+
+    const count = response.headers.get('Content-Range');
+    if (!count) {
+      throw new Error('Count header not found in response');
+    }
+    const totalCount = parseInt(count.split('/')[1], 10);
+    return totalCount;
+  }
+
   async addSearchToQueue(query, options = {}) {
-    const limit = isNaN(parseInt(options.limit)) ? 100 : parseInt(options.limit);
-    const perPage = Math.min(limit, 100);
+    let limit;
+    let perPage = 100;
+    if ( options.limit ){
+      limit = isNaN(parseInt(options.limit)) ? 100 : parseInt(options.limit);
+      perPage = Math.min(limit, 100);
+    }
     let nextPage = options.page ? parseInt(options.page) : 1;
-    const summary = { success: false, calls: 0, items: 0, skipped: 0, added: 0 };
+    const summary = { success: false, calls: 0, items: 0, skipped: 0, added: 0, lastPage: nextPage };
     try {
       do {
         const result = await github.searchOrgs(query, {
           per_page: perPage,
           page: nextPage
         });
+        summary.lastPage = nextPage;
         summary.calls++;
         if (result.payload && result.payload.items) {
           for (const org of result.payload.items) {
             summary.items++;
-            logger.info(`Adding organization to processing queue: ${org.login}`);
+            // logger.info(`Adding organization to processing queue: ${org.login}`);
 
             // Add organization to processing queue using postgrest
             const response = await fetch(`${config.postgrest.host.value}/rpc/add_to_selection_queue_if_new`, {
@@ -76,15 +106,16 @@ class Organization {
             const inserted = await response.json();
             if ( inserted ){
               summary.added++;
-              logger.info(`Organization ${org.login} added to processing queue`);
+              // logger.info(`Organization ${org.login} added to processing queue`);
             } else {
               summary.skipped++;
-              logger.info(`Organization ${org.login} already exists in processing queue, skipping`);
+              // logger.info(`Organization ${org.login} already exists in processing queue, skipping`);
             }
           }
         }
         nextPage = result.nextPage;
-        if ( summary.items >= limit ) {
+        logger.info(`Next page: ${nextPage}`);
+        if ( limit && summary.items >= limit ) {
           logger.info(`Reached limit of ${limit} items, stopping search`);
           break;
         }
