@@ -32,7 +32,16 @@ class Harvest {
       }
       try {
         const orgDetails = await github.fetch(result.item.url);
-        utils.logObject(orgDetails.payload);
+        const simplified = {
+          login: orgDetails.payload.login,
+          name: orgDetails.payload.name,
+          bio: orgDetails.payload.bio,
+          blog: orgDetails.payload.blog,
+          location: orgDetails.payload.location,
+          email: orgDetails.payload.email,
+          html_url: orgDetails.payload.html_url
+        };
+        utils.logObject(simplified);
       } catch (error) {
         utils.logObject(result);
       }

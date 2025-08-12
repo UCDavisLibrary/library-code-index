@@ -46,7 +46,7 @@ class Organization {
   async addSearchToQueue(query, options = {}) {
     const limit = isNaN(parseInt(options.limit)) ? 100 : parseInt(options.limit);
     const perPage = Math.min(limit, 100);
-    let nextPage = 1;
+    let nextPage = options.page ? parseInt(options.page) : 1;
     const summary = { success: false, calls: 0, items: 0, skipped: 0, added: 0 };
     try {
       do {

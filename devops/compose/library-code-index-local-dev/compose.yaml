@@ -53,5 +53,48 @@ services:
     ports:
       - ${ADMINER_HOST_PORT:-8080}:8080
 
+  init:
+    image: *main-image
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      # RUN_INIT: true
+      INIT_DATA_ENV: ${INIT_DATA_ENV:-localhost}
+      PGUSER: 'postgres'
+      PGHOST: 'db'
+      PGDATABASE: 'postgres'
+      PGPASSWORD: 'localhost'
+      PGPORT: 5432
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GC_BACKUP_BUCKET: itis-backups/library-code-index
+      BACKUP_FILE_NAME: db.sql.gz
+    volumes:
+      - ../../../services/deploy-utils/init:/services/deploy-utils/init
+      - ../../../secrets/gc-reader-key.json:/etc/service-account.json
+    command: ./deploy-utils/init/init.sh
+  backup:
+    image: *main-image
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      # RUN_BACKUP: true
+      BACKUP_DATA_ENV: ${BACKUP_DATA_ENV:-localhost}
+      BACKUP_LOG_TABLE: ${BACKUP_LOG_TABLE:-lci.backup_log}
+      PGUSER: 'postgres'
+      PGHOST: 'db'
+      PGDATABASE: 'postgres'
+      PGPASSWORD: 'localhost'
+      PGPORT: 5432
+      GOOGLE_APPLICATION_CREDENTIALS: /etc/service-account.json
+      GC_BACKUP_BUCKET: itis-backups/library-code-index
+      BACKUP_FILE_NAME: db.sql.gz
+    volumes:
+      - ../../../services/deploy-utils/backup:/services/deploy-utils/backup
+      - ../../../secrets/gc-writer-key.json:/etc/service-account.json
+
 volumes:
   db-data:

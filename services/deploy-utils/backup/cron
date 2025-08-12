@@ -1,0 +1,1 @@
+0 3 * * * /services/deploy-utils/backup/backup.sh >> /var/log/cron.log

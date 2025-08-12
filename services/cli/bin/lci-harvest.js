@@ -6,9 +6,10 @@ const program = new Command();
 program
   .command('organization')
   .alias('org')
-  .description('Search for github organization(s), and add to processing queue')
+  .description('Search for github organization(s), and add to selection processing queue')
   .argument('<query>', 'Search query or organization name')
   .option('-l, --limit <number>', 'Limit number of results')
+  .option('-p, --page <number>', 'Page number to start from')
   .option('-v, --verbose', 'Enable info logging')
   .action(harvest.organization.bind(harvest));
 
