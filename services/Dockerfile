@@ -40,7 +40,7 @@ RUN mkdir -p deploy-utils/data/backup && \
 COPY services/deploy-utils/backup ./deploy-utils/backup
 COPY services/deploy-utils/backup/cron /etc/cron.d/backup
 RUN chmod 0644 /etc/cron.d/backup
-COPY services/deploy-utils/init init
+COPY services/deploy-utils/init ./deploy-utils/init
 
 RUN npm install
 
