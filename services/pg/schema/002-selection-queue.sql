@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS lci.selection_queue (
   updated_at timestamp NOT NULL DEFAULT now()
 );
 
-CREATE OR REPLACE TRIGGER set_updated_at
+CREATE OR REPLACE TRIGGER selection_queue_updated_at
   BEFORE UPDATE ON lci.selection_queue
   FOR EACH ROW
   EXECUTE PROCEDURE public.set_updated_at();

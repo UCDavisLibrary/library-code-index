@@ -15,8 +15,14 @@ program
 
 program
   .command('review-next-org')
-  .description('Review the next organization in the processing queue')
+  .description('Review the next organization in the selection processing queue')
   .option('-v, --verbose', 'Enable info logging')
   .action(harvest.reviewNextOrg.bind(harvest));
+
+program
+  .command('adopt-orgs')
+  .description('Adopt selected organizations in processing queue into the database')
+  .option('-v, --verbose', 'Enable info logging')
+  .action(harvest.adoptOrgs.bind(harvest));
 
 program.parse(process.argv);

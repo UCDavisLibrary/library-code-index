@@ -1,5 +1,6 @@
 import util from 'util';
 import readline from 'readline';
+import config from '../../lib/config.js';
 
 class Utils {
 
@@ -19,6 +20,17 @@ class Utils {
         resolve(/^y(es)?$/i.test(answer));
       });
     });
+  }
+
+  processVerboseFlag(options, noDelete) {
+    if (options.verbose) {
+      config.harvester.logger.level.value = 'info';
+    } else {
+      config.harvester.logger.level.value = 'error';
+    }
+    if (!noDelete) {
+      delete options.verbose;
+    }
   }
 }
 

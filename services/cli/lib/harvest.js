@@ -1,27 +1,16 @@
 import utils from './utils.js';
-import config from '../../lib/config.js';
 
 class Harvest {
 
   async organization(query, options = {}) {
-    if (options.verbose) {
-      config.harvester.logger.level.value = 'info';
-    } else {
-      config.harvester.logger.level.value = 'error';
-    }
-    delete options.verbose;
+    utils.processVerboseFlag(options);
     const harvester = (await import('../../harvester/index.js')).default;
     const result = await harvester.models.org.addSearchToQueue(query, options);
     utils.logObject(result);
   }
 
   async reviewNextOrg(options = {}) {
-    if (options.verbose) {
-      config.harvester.logger.level.value = 'info';
-    } else {
-      config.harvester.logger.level.value = 'error';
-    }
-    delete options.verbose;
+    utils.processVerboseFlag(options);
     const harvester = (await import('../../harvester/index.js')).default;
     const github = (await import('../../harvester/lib/github.js')).default;
     while (true) {
@@ -53,6 +42,12 @@ class Harvest {
       console.log(selected ? 'Org Selected' : 'Org Not Selected');
       console.clear();
     }
+  }
+
+  async adoptOrgs(options = {}) {
+    utils.processVerboseFlag(options);
+    const harvester = (await import('../../harvester/index.js')).default;
+    const result = await harvester.models.org.adoptOrgs();
   }
 
 }
